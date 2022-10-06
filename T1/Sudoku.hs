@@ -3,7 +3,34 @@ import Data.Set (fromList)
 import Data.Tuple (swap)
 
 data Cell = Nil | Cell {value :: Int, right :: Char, bottom :: Char}
-    deriving (Show)
+
+inverseOf :: Char -> Char
+inverseOf c
+    | c == '+' = '-'
+    | c == '-' = '+'
+    | otherwise = c
+
+charToOp :: Char -> Int -> (Int -> Bool)
+charToOp op val
+    | op == '+'  = (>) val
+    | op == '-'  = (<) val
+    | otherwise  = const True
+
+rightOp :: Cell -> (Int -> Bool)
+rightOp Nil = const False
+rightOp c@(Cell v r _) = charToOp r v
+
+rightOp' :: Cell -> (Int -> Bool)
+rightOp' Nil = const False
+rightOp' (Cell v r b) = rightOp (Cell v (inverseOf r) b)
+
+bottomOp :: Cell -> (Int -> Bool)
+bottomOp Nil = const False
+bottomOp c@(Cell v _ b) = charToOp b v
+
+bottomOp' :: Cell -> (Int -> Bool)
+bottomOp' Nil = const False
+bottomOp' (Cell v r b) = bottomOp (Cell v r (inverseOf b))
 
 instance Eq Cell where
     (Cell v1 _ _) == (Cell v2 _ _) = v1 == v2
@@ -12,6 +39,10 @@ instance Eq Cell where
 instance Ord Cell where
     (Cell v1 _ _) `compare` (Cell v2 _ _) = v1 `compare` v2
     _ `compare` _ = 1 `compare` 1
+
+instance Show Cell where
+    show (Cell v _ _) = show v
+    show _ = show "Nil"
 
 type Line = [Cell]
 type Board = [Line]
@@ -67,3 +98,18 @@ regionAt b (x, y) =
 
 validate :: Line -> Bool
 validate l = length l == length (fromList l)
+
+-- Não foi testado ainda.
+-- Isso provavelmente falha em comparações com células = 0
+possibilities :: Board -> (Int, Int) -> [Int]
+possibilities b coord@(x, y) =
+    let
+        adjacentConditions = [
+            rightOp $ cellAt b (x - 1, y),
+            bottomOp $ cellAt b (x, y - 1),
+            rightOp' $ cellAt b (x + 1, y),
+            bottomOp' $ cellAt b (x, y + 1)]
+        used = map value (rowAt b y ++ columnAt b x ++ regionAt b coord)
+        assert v = all (\cond -> cond v) adjacentConditions
+    in
+    filter assert $ filter (`elem` used) [0..9]
