@@ -2,8 +2,15 @@ module Sudoku where
 import Data.Set (fromList)
 import Data.Tuple (swap)
 
-data Cell = Cell {value::Int, right::Bool, bottom::Bool}
-    deriving(Show, Eq)
+data Cell = Cell {value :: Int, right :: Char, bottom :: Char}
+    deriving (Show)
+
+instance Eq Cell where
+    (Cell v1 _ _) == (Cell v2 _ _) = v1 == v2
+
+instance Ord Cell where
+    (Cell v1 _ _) `compare` (Cell v2 _ _) = v1 `compare` v2
+
 type Line = [Cell]
 type Board = [Line]
 
@@ -21,7 +28,7 @@ m = [
     [0, 0, 0, 0, 0, 0, 2, 0, 5]]
 
 dummy :: Int -> Cell
-dummy v = Cell v False False
+dummy v = Cell v '.' '.'
 
 b :: Board
 b = map (map dummy) m
