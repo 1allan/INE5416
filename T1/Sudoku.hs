@@ -2,14 +2,16 @@ module Sudoku where
 import Data.Set (fromList)
 import Data.Tuple (swap)
 
-data Cell = Cell {value :: Int, right :: Char, bottom :: Char}
+data Cell = Nil | Cell {value :: Int, right :: Char, bottom :: Char}
     deriving (Show)
 
 instance Eq Cell where
     (Cell v1 _ _) == (Cell v2 _ _) = v1 == v2
+    _ == _ = False
 
 instance Ord Cell where
     (Cell v1 _ _) `compare` (Cell v2 _ _) = v1 `compare` v2
+    _ `compare` _ = 1 `compare` 1
 
 type Line = [Cell]
 type Board = [Line]
@@ -39,6 +41,14 @@ itop i = swap $ i `divMod` 8
 ptoi :: (Int, Int) -> Int
 ptoi (x, y) = y * 9 + x
 
+drop0s :: Line -> Line
+drop0s = filter (\x -> value x /= 0)
+
+cellAt :: Board -> (Int, Int) -> Cell
+cellAt b (x, y)
+    | x > length b = Nil
+    | otherwise = (b !! y) !! x
+
 rowAt :: Board -> Int -> Line
 rowAt m i
     | i < 0 || i >= length m = []
@@ -54,3 +64,6 @@ regionAt :: Board -> (Int, Int) -> Line
 regionAt b (x, y) =
     let rows = drop (y `div` 3 * 3) in
     concatMap (take 3) (take 3 (rows b))
+
+validate :: Line -> Bool
+validate l = length l == length (fromList l)
