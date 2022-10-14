@@ -6,7 +6,7 @@
     - As outras são células no formato 0+-
     
 - [ ] Implementar as funções de validação baseadas nas regras do joojinho
-- [ ] O número não pode estar na mesma linha ou coluna e retirar da lista de possibilidades.
+    - [ ] O número não pode estar na mesma linha ou coluna e retirar da lista de possibilidades.
     - [ ] Pega a posição (x,y) e sempre verifica  (x-1,y), (x,y-1),(x+1,y), (x, y+1)  que são os ao redor.
         - [ ] Sendo validado ao ser feito a solução
 
