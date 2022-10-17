@@ -60,11 +60,15 @@ m = [
     [2, 0, 0, 0, 0, 0, 4, 8, 0],
     [0, 0, 0, 0, 0, 0, 2, 0, 5]]
 
-dummy :: Int -> Cell
-dummy v = Cell v '.' '.'
-
 b :: Board
-b = map (map dummy) m
+b = let dummy v = Cell v '.' '.' in map (map dummy) m
+
+boardToList :: Board -> [Cell]
+boardToList = concat
+
+listToBoard :: [Cell] -> Board
+listToBoard [] = []
+listToBoard b = take 9 b : listToBoard (drop 9 b)
 
 itop :: Int -> (Int, Int)
 itop i = swap $ i `divMod` 8
@@ -99,6 +103,11 @@ regionAt b (x, y) =
 validate :: Line -> Bool
 validate l = length l == length (fromList l)
 
+replace :: [a] -> a -> Int -> [a]
+replace l e i
+    | i < length l = take i l ++ [e] ++ drop (i - 1) l
+    | otherwise = l
+
 -- Não foi testado ainda.
 -- Isso provavelmente falha em comparações com células = 0
 possibilities :: Board -> (Int, Int) -> [Int]
@@ -113,3 +122,34 @@ possibilities b coord@(x, y) =
         assert v = all (\cond -> cond v) adjacentConditions
     in
     filter assert $ filter (`elem` used) [0..9]
+
+possibilities' :: [Cell] -> Int -> [Int]
+possibilities' b p = possibilities (listToBoard b) (itop p)
+
+solve :: Board -> Board
+solve b = let
+        board = boardToList b
+        -- possMatrix = replace (map (const []) board) (possibilities' board 0) 0
+        possMatrix =  map (const []) board
+    in
+    go board possMatrix 0 True
+        where
+            go :: [Cell] -> [[Int]] -> Int -> Bool -> Board
+            go b _ (-1) _ = listToBoard b  -- empty board / no solution
+            go b _ 81 _ = listToBoard b  -- solved
+            go b b' i False
+                | null (b' !! i) = go b b' (i - 1) False
+                | otherwise = let
+                        (x:xs) = (b' !! i)
+                        currCell = b !! i
+                        newCell = Cell x (right currCell) (bottom currCell)
+                    in
+                    go (replace b newCell i) (replace b' xs i) (i + 1) True
+            go b b' i True
+                | null (possibilities' b i) = go b b' (i - 1) False
+                | otherwise = let 
+                        (x:xs) = possibilities' b i
+                        currCell = b !! i
+                        newCell = Cell x (right currCell) (bottom currCell)
+                    in
+                    go (replace b newCell i) (replace b' xs i) (i + 1) True
