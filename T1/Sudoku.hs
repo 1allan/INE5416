@@ -20,44 +20,16 @@ rightOp :: Cell -> (Int -> Bool)
 rightOp Nil = const True
 rightOp c@(Cell v r _) = charToOp r v
 
-rightOp' :: Cell -> (Int -> Bool)
-rightOp' Nil = const True
-rightOp' (Cell v r b) = rightOp (Cell v (inverseOf r) b)
-
 bottomOp :: Cell -> (Int -> Bool)
 bottomOp Nil = const True
 bottomOp c@(Cell v _ b) = charToOp b v
 
-bottomOp' :: Cell -> (Int -> Bool)
-bottomOp' Nil = const True
-bottomOp' (Cell v r b) = bottomOp (Cell v r (inverseOf b))
-
-instance Eq Cell where
-    (Cell v1 _ _) == (Cell v2 _ _) = v1 == v2
-    _ == _ = False
-
 instance Show Cell where
-    show (Cell v _ _) = show v
+    show (Cell v r b) = show [intToDigit v, r, b]
     show _ = show "Nil"
 
 type Line = [Cell]
 type Board = [Line]
-
-
-m :: [[Int]]
-m = [
-    [5, 0, 9, 6, 0, 0, 0, 0, 0],
-    [0, 2, 1, 0, 0, 0, 0, 0, 8],
-    [0, 0, 6, 5, 0, 0, 0, 0, 0],
-    [7, 0, 5, 0, 1, 0, 0, 2, 0],
-    [0, 6, 0, 0, 0, 0, 0, 4, 0],
-    [0, 1, 0, 0, 2, 0, 8, 0, 7],
-    [0, 0, 0, 0, 0, 5, 7, 0, 0],
-    [2, 0, 0, 0, 0, 0, 4, 8, 0],
-    [0, 0, 0, 0, 0, 0, 2, 0, 5]]
-
-b :: Board
-b = let dummy v = Cell v '.' '.' in map (map dummy) m
 
 boardToList :: Board -> [Cell]
 boardToList = concat
@@ -77,7 +49,7 @@ drop0s = filter (\x -> value x /= 0)
 
 cellAt :: Board -> (Int, Int) -> Cell
 cellAt b (x, y)
-    | x > length b || x < 0 || y > length b || y < 0 = Nil
+    | x < 0 || y < 0 || x >= length b || y >= length b = Nil
     | otherwise = (b !! y) !! x
 
 rowAt :: Board -> Int -> Line
@@ -134,7 +106,11 @@ solve b = let
                     poss = if forward then possibilities' b i else b' !! i
                 in
                 case poss of
-                    [] -> go b b' (i - 1) False
+                    [] -> let 
+                            currCell = b !! i
+                            emptyCell = Cell 0 (right currCell) (bottom currCell)
+                        in
+                        go (replace b emptyCell i) b' (i - 1) False
                     _ -> let
                             (x:xs) = poss
                             currCell = b !! i
