@@ -12,5 +12,5 @@ main = do
     str <- readFile "./a.txt"
     let cells = map (\(v:r:b) -> Cell (digitToInt v) r (head b)) (words str)
     let b = listToMatrix cells
-    printBoard b
+    printBoard (solve b)
     return ()

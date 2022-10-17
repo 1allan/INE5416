@@ -81,7 +81,7 @@ drop0s = filter (\x -> value x /= 0)
 
 cellAt :: Board -> (Int, Int) -> Cell
 cellAt b (x, y)
-    | x > length b = Nil
+    | x > length b || x < 0 || y > length b || y < 0 = Nil
     | otherwise = (b !! y) !! x
 
 rowAt :: Board -> Int -> Line
@@ -137,19 +137,14 @@ solve b = let
             go :: [Cell] -> [[Int]] -> Int -> Bool -> Board
             go b _ (-1) _ = listToBoard b  -- empty board / no solution
             go b _ 81 _ = listToBoard b  -- solved
-            go b b' i False
-                | null (b' !! i) = go b b' (i - 1) False
-                | otherwise = let
-                        (x:xs) = (b' !! i)
-                        currCell = b !! i
-                        newCell = Cell x (right currCell) (bottom currCell)
-                    in
-                    go (replace b newCell i) (replace b' xs i) (i + 1) True
-            go b b' i True
-                | null (possibilities' b i) = go b b' (i - 1) False
-                | otherwise = let 
-                        (x:xs) = possibilities' b i
-                        currCell = b !! i
-                        newCell = Cell x (right currCell) (bottom currCell)
-                    in
-                    go (replace b newCell i) (replace b' xs i) (i + 1) True
+            go b b' i forward = let
+                    poss = if forward then possibilities' b i else b' !! i
+                in
+                case poss of
+                    [] -> go b b' (i - 1) False
+                    _ -> let
+                            (x:xs) = poss
+                            currCell = b !! i
+                            newCell = Cell x (right currCell) (bottom currCell)
+                        in
+                        go (replace b newCell i) (replace b' xs i) (i + 1) True
