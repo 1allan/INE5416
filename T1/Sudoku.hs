@@ -17,28 +17,24 @@ charToOp op val
     | otherwise  = const True
 
 rightOp :: Cell -> (Int -> Bool)
-rightOp Nil = const False
+rightOp Nil = const True
 rightOp c@(Cell v r _) = charToOp r v
 
 rightOp' :: Cell -> (Int -> Bool)
-rightOp' Nil = const False
+rightOp' Nil = const True
 rightOp' (Cell v r b) = rightOp (Cell v (inverseOf r) b)
 
 bottomOp :: Cell -> (Int -> Bool)
-bottomOp Nil = const False
+bottomOp Nil = const True
 bottomOp c@(Cell v _ b) = charToOp b v
 
 bottomOp' :: Cell -> (Int -> Bool)
-bottomOp' Nil = const False
+bottomOp' Nil = const True
 bottomOp' (Cell v r b) = bottomOp (Cell v r (inverseOf b))
 
 instance Eq Cell where
     (Cell v1 _ _) == (Cell v2 _ _) = v1 == v2
     _ == _ = False
-
-instance Ord Cell where
-    (Cell v1 _ _) `compare` (Cell v2 _ _) = v1 `compare` v2
-    _ `compare` _ = 1 `compare` 1
 
 instance Show Cell where
     show (Cell v _ _) = show v
@@ -100,12 +96,9 @@ regionAt b (x, y) =
     let rows = drop (y `div` 3 * 3) in
     concatMap (take 3) (take 3 (rows b))
 
-validate :: Line -> Bool
-validate l = length l == length (fromList l)
-
 replace :: [a] -> a -> Int -> [a]
 replace l e i
-    | i < length l = take i l ++ [e] ++ drop (i - 1) l
+    | i >= 0 && i < length l = take i l ++ [e] ++ drop (i + 1) l
     | otherwise = l
 
 -- Não foi testado ainda.
@@ -115,13 +108,13 @@ possibilities b coord@(x, y) =
     let
         adjacentConditions = [
             rightOp $ cellAt b (x - 1, y),
-            bottomOp $ cellAt b (x, y - 1),
-            rightOp' $ cellAt b (x + 1, y),
-            bottomOp' $ cellAt b (x, y + 1)]
+            bottomOp $ cellAt b (x, y - 1)]
         used = map value (rowAt b y ++ columnAt b x ++ regionAt b coord)
         assert v = all (\cond -> cond v) adjacentConditions
     in
-    filter assert $ filter (`elem` used) [0..9]
+    -- possible performance improvement:
+    -- [((quantity of >) + 1 )..(9 - (quantity of <))] instead of [0..9]
+    filter assert $ filter (`notElem` used) [0..9]
 
 possibilities' :: [Cell] -> Int -> [Int]
 possibilities' b p = possibilities (listToBoard b) (itop p)
