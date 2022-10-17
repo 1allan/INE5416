@@ -67,7 +67,7 @@ listToBoard [] = []
 listToBoard b = take 9 b : listToBoard (drop 9 b)
 
 itop :: Int -> (Int, Int)
-itop i = swap $ i `divMod` 8
+itop i = swap $ i `divMod` 9
 
 ptoi :: (Int, Int) -> Int
 ptoi (x, y) = y * 9 + x
@@ -114,7 +114,7 @@ possibilities b coord@(x, y) =
     in
     -- possible performance improvement:
     -- [((quantity of >) + 1 )..(9 - (quantity of <))] instead of [0..9]
-    filter assert $ filter (`notElem` used) [0..9]
+    filter assert $ filter (`notElem` used) [1..9]
 
 possibilities' :: [Cell] -> Int -> [Int]
 possibilities' b p = possibilities (listToBoard b) (itop p)
