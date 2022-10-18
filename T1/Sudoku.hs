@@ -9,8 +9,8 @@ type Line = [Cell]
 type Board = [Line]
 
 partialOp :: Char -> Int -> (Int -> Bool)
-partialOp '>' val = (>) val
-partialOp '<' val = (<) val
+partialOp '+' val = (>) val
+partialOp '-' val = (<) val
 partialOp _ _  = const True
 
 rightOp :: Cell -> (Int -> Bool)
