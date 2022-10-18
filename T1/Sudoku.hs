@@ -1,6 +1,7 @@
 module Sudoku where
 import Data.Set (fromList)
 import Data.Tuple (swap)
+import Data.Char (intToDigit)
 
 data Cell = Nil | Cell {value :: Int, right :: Char, bottom :: Char}
 
@@ -74,8 +75,6 @@ replace l e i
     | i >= 0 && i < length l = take i l ++ [e] ++ drop (i + 1) l
     | otherwise = l
 
--- Não foi testado ainda.
--- Isso provavelmente falha em comparações com células = 0
 possibilities :: Board -> (Int, Int) -> [Int]
 possibilities b coord@(x, y) =
     let
@@ -85,8 +84,6 @@ possibilities b coord@(x, y) =
         used = map value (rowAt b y ++ columnAt b x ++ regionAt b coord)
         assert v = all (\cond -> cond v) adjacentConditions
     in
-    -- possible performance improvement:
-    -- [((quantity of >) + 1 )..(9 - (quantity of <))] instead of [0..9]
     filter assert $ filter (`notElem` used) [1..9]
 
 possibilities' :: [Cell] -> Int -> [Int]
@@ -95,14 +92,13 @@ possibilities' b p = possibilities (listToBoard b) (itop p)
 solve :: Board -> Board
 solve b = let
         board = boardToList b
-        -- possMatrix = replace (map (const []) board) (possibilities' board 0) 0
         possMatrix =  map (const []) board
     in
     go board possMatrix 0 True
         where
             go :: [Cell] -> [[Int]] -> Int -> Bool -> Board
-            go b _ (-1) _ = listToBoard b  -- empty board / no solution
-            go b _ 81 _ = listToBoard b  -- solved
+            go b _ (-1) _ = listToBoard b
+            go b _ 81 _ = listToBoard b
             go b b' i forward = let
                     poss = if forward then possibilities' b i else b' !! i
                 in
