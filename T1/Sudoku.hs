@@ -5,16 +5,14 @@ import Data.Tuple (swap)
 data Cell = Nil | Cell {value :: Int, right :: Char, bottom :: Char}
 
 inverseOf :: Char -> Char
-inverseOf c
-    | c == '+' = '-'
-    | c == '-' = '+'
-    | otherwise = c
+inverseOf '+' = '-'
+inverseOf '-' = '+'
+inverseOf c = c
 
 charToOp :: Char -> Int -> (Int -> Bool)
-charToOp op val
-    | op == '+'  = (>) val
-    | op == '-'  = (<) val
-    | otherwise  = const True
+charToOp '+' val = (>) val
+charToOp '-' val = (<) val
+charToOp _ _  = const True
 
 rightOp :: Cell -> (Int -> Bool)
 rightOp Nil = const True

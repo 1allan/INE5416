@@ -9,7 +9,7 @@ listToMatrix xs = take 9 xs : listToMatrix (drop 9 xs)
 
 main :: IO ()
 main = do
-    str <- readFile "./a.txt"
+    str <- readFile "./111.txt"
     let cells = map (\(v:r:b) -> Cell (digitToInt v) r (head b)) (words str)
     let b = listToMatrix cells
     printBoard (solve b)
