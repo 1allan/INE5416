@@ -9,7 +9,10 @@ parse str = listToBoard cells where
 
 main :: IO ()
 main = do
-    str <- readFile "./boards/156.txt"
+    putStrLn "Board id:"
+    fileName <- getLine
+    str <- readFile ("./boards/" ++ fileName ++ ".txt")
+    putStrLn "Solving..."
     let board = parse str
     printBoard (solve board)
     return ()
