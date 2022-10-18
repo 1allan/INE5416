@@ -3,14 +3,18 @@ import Print
 import Data.Char (digitToInt)
 import Data.List (splitAt)
 
-listToMatrix :: Line -> Board
-listToMatrix [] = []
-listToMatrix xs = take 9 xs : listToMatrix (drop 9 xs)
+charMap :: Char -> Char
+charMap '+' = '+'
+charMap '-' = '-'
+charMap _ = '.'
+
+parse :: String -> Board
+parse str = listToBoard cells where
+    cells = map (\(v:r:b) -> Cell (digitToInt v) (charMap r) (charMap (head b))) (words str)
 
 main :: IO ()
 main = do
-    str <- readFile "./111.txt"
-    let cells = map (\(v:r:b) -> Cell (digitToInt v) r (head b)) (words str)
-    let b = listToMatrix cells
-    printBoard (solve b)
+    str <- readFile "./boards/156.txt"
+    let board = parse str
+    printBoard (solve board)
     return ()

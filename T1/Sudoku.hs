@@ -5,30 +5,21 @@ import Data.Char (intToDigit)
 
 data Cell = Nil | Cell {value :: Int, right :: Char, bottom :: Char}
 
-inverseOf :: Char -> Char
-inverseOf '+' = '-'
-inverseOf '-' = '+'
-inverseOf c = c
+type Line = [Cell]
+type Board = [Line]
 
-charToOp :: Char -> Int -> (Int -> Bool)
-charToOp '+' val = (>) val
-charToOp '-' val = (<) val
-charToOp _ _  = const True
+partialOp :: Char -> Int -> (Int -> Bool)
+partialOp '>' val = (>) val
+partialOp '<' val = (<) val
+partialOp _ _  = const True
 
 rightOp :: Cell -> (Int -> Bool)
 rightOp Nil = const True
-rightOp (Cell v r _) = charToOp r v
+rightOp (Cell v r _) = partialOp r v
 
 bottomOp :: Cell -> (Int -> Bool)
 bottomOp Nil = const True
-bottomOp (Cell v _ b) = charToOp b v
-
-instance Show Cell where
-    show (Cell v r b) = show [intToDigit v, r, b]
-    show _ = show "Nil"
-
-type Line = [Cell]
-type Board = [Line]
+bottomOp (Cell v _ b) = partialOp b v
 
 boardToList :: Board -> [Cell]
 boardToList = concat
@@ -94,23 +85,22 @@ solve b = let
         board = boardToList b
         possMatrix =  map (const []) board
     in
-    go board possMatrix 0 True
-        where
-            go :: [Cell] -> [[Int]] -> Int -> Bool -> Board
-            go b _ (-1) _ = listToBoard b
-            go b _ 81 _ = listToBoard b
-            go b b' i forward = let
-                    poss = if forward then possibilities' b i else b' !! i
-                in
-                case poss of
-                    [] -> let 
-                            currCell = b !! i
-                            emptyCell = Cell 0 (right currCell) (bottom currCell)
-                        in
-                        go (replace b emptyCell i) b' (i - 1) False
-                    _ -> let
-                            (x:xs) = poss
-                            currCell = b !! i
-                            newCell = Cell x (right currCell) (bottom currCell)
-                        in
-                        go (replace b newCell i) (replace b' xs i) (i + 1) True
+    go board possMatrix 0 True where
+        go :: [Cell] -> [[Int]] -> Int -> Bool -> Board
+        go b _ (-1) _ = listToBoard b
+        go b _ 81 _ = listToBoard b
+        go b b' i forward = let
+                poss = if forward then possibilities' b i else b' !! i
+            in
+            case poss of
+                [] -> let 
+                        currCell = b !! i
+                        emptyCell = Cell 0 (right currCell) (bottom currCell)
+                    in
+                    go (replace b emptyCell i) b' (i - 1) False
+                _ -> let
+                        (x:xs) = poss
+                        currCell = b !! i
+                        newCell = Cell x (right currCell) (bottom currCell)
+                    in
+                    go (replace b newCell i) (replace b' xs i) (i + 1) True
