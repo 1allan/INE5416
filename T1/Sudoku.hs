@@ -18,11 +18,11 @@ charToOp op val
 
 rightOp :: Cell -> (Int -> Bool)
 rightOp Nil = const True
-rightOp c@(Cell v r _) = charToOp r v
+rightOp (Cell v r _) = charToOp r v
 
 bottomOp :: Cell -> (Int -> Bool)
 bottomOp Nil = const True
-bottomOp c@(Cell v _ b) = charToOp b v
+bottomOp (Cell v _ b) = charToOp b v
 
 instance Show Cell where
     show (Cell v r b) = show [intToDigit v, r, b]
@@ -65,8 +65,11 @@ columnAt (x:xs) i
 
 regionAt :: Board -> (Int, Int) -> Line
 regionAt b (x, y) =
-    let rows = drop (y `div` 3 * 3) in
-    concatMap (take 3) (take 3 (rows b))
+    let 
+        y' = (y `div` 3 * 3)
+        x' = (x `div` 3 * 3)
+        rows = take 3 (drop y' b) in
+    concatMap (take 3 . drop x') rows
 
 replace :: [a] -> a -> Int -> [a]
 replace l e i
