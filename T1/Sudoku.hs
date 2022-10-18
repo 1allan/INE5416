@@ -8,6 +8,19 @@ data Cell = Nil | Cell {value :: Int, right :: Char, bottom :: Char}
 type Line = [Cell]
 type Board = [Line]
 
+right' :: Cell -> Char
+right' Nil = '.'
+right' c = right c
+
+bottom' :: Cell -> Char
+bottom' Nil = '.'
+bottom' c = bottom c
+
+inverseOf :: Char -> Char
+inverseOf '+' = '-'
+inverseOf '-' = '+'
+inverseOf c = c
+
 partialOp :: Char -> Int -> (Int -> Bool)
 partialOp '+' val = (>) val
 partialOp '-' val = (<) val
@@ -74,8 +87,14 @@ possibilities b coord@(x, y) =
             bottomOp $ cellAt b (x, y - 1)]
         used = map value (rowAt b y ++ columnAt b x ++ regionAt b coord)
         assert v = all (\cond -> cond v) adjacentConditions
+        operations = [
+            inverseOf $ right' $ cellAt b (x - 1, y),
+            inverseOf $ bottom' $ cellAt b (x, y - 1),
+            right $ cellAt b (x, y),
+            bottom $ cellAt b (x, y)]
+        range = [length (filter (=='+') operations) + 1 .. 9 - length (filter (=='-') operations)]
     in
-    filter assert $ filter (`notElem` used) [1..9]
+    filter assert $ filter (`notElem` used) range
 
 possibilities' :: [Cell] -> Int -> [Int]
 possibilities' b p = possibilities (listToBoard b) (itop p)
