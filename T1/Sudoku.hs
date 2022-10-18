@@ -1,7 +1,5 @@
 module Sudoku where
-import Data.Set (fromList)
 import Data.Tuple (swap)
-import Data.Char (intToDigit)
 
 data Cell = Nil | Cell {value :: Int, right :: Char, bottom :: Char}
 
@@ -42,13 +40,7 @@ listToBoard [] = []
 listToBoard b = take 9 b : listToBoard (drop 9 b)
 
 itop :: Int -> (Int, Int)
-itop i = swap $ i `divMod` 9
-
-ptoi :: (Int, Int) -> Int
-ptoi (x, y) = y * 9 + x
-
-drop0s :: Line -> Line
-drop0s = filter (\x -> value x /= 0)
+itop i = swap (i `divMod` 9)
 
 cellAt :: Board -> (Int, Int) -> Cell
 cellAt b (x, y)
@@ -82,19 +74,21 @@ replace l e i
 possibilities :: Board -> (Int, Int) -> [Int]
 possibilities b coord@(x, y) =
     let
-        adjacentConditions = [
-            rightOp $ cellAt b (x - 1, y),
-            bottomOp $ cellAt b (x, y - 1)]
-        used = map value (rowAt b y ++ columnAt b x ++ regionAt b coord)
-        assert v = all (\cond -> cond v) adjacentConditions
-        operations = [
-            inverseOf $ right' $ cellAt b (x - 1, y),
-            inverseOf $ bottom' $ cellAt b (x, y - 1),
-            right $ cellAt b (x, y),
-            bottom $ cellAt b (x, y)]
-        range = [length (filter (=='+') operations) + 1 .. 9 - length (filter (=='-') operations)]
+        currentCell = cellAt b coord
+        upperCell = cellAt b (x, y - 1)
+        leftCell = cellAt b (x - 1, y)
+
+        assert v = all (\cond -> cond v) [rightOp leftCell, bottomOp upperCell]
+
+        usedValues = map value (rowAt b y ++ columnAt b x ++ regionAt b coord)
+
+        operations = [inverseOf (right' leftCell), inverseOf (bottom' upperCell), right currentCell, bottom currentCell]
+        minValue = 1 + length (filter (=='+') operations)
+        maxValue = 9 - length (filter (=='-') operations)
+
+        possibilities = filter (`notElem` usedValues) [minValue .. maxValue]
     in
-    filter assert $ filter (`notElem` used) range
+    filter assert possibilities
 
 possibilities' :: [Cell] -> Int -> [Int]
 possibilities' b p = possibilities (listToBoard b) (itop p)
@@ -105,19 +99,18 @@ solve b = let
         possMatrix =  map (const []) board
     in
     go board possMatrix 0 True where
-        go :: [Cell] -> [[Int]] -> Int -> Bool -> Board
         go b _ (-1) _ = listToBoard b
         go b _ 81 _ = listToBoard b
         go b b' i forward = let
                 poss = if forward then possibilities' b i else b' !! i
             in
             case poss of
-                [] -> let 
+                [] -> let
                         currCell = b !! i
                         emptyCell = Cell 0 (right currCell) (bottom currCell)
                     in
                     go (replace b emptyCell i) b' (i - 1) False
-                _ -> let
+                _  -> let
                         (x:xs) = poss
                         currCell = b !! i
                         newCell = Cell x (right currCell) (bottom currCell)
