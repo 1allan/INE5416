@@ -71,9 +71,11 @@ replace l e i
     | i >= 0 && i < length l = take i l ++ [e] ++ drop (i + 1) l
     | otherwise = l
 
-possibilities :: Board -> (Int, Int) -> [Int]
-possibilities b coord@(x, y) =
+possibilities :: [Cell] -> Int -> [Int]
+possibilities b' index =
     let
+        coord@(x, y) = itop index
+        b = listToBoard b'
         currentCell = cellAt b coord
         upperCell = cellAt b (x, y - 1)
         leftCell = cellAt b (x - 1, y)
@@ -90,9 +92,6 @@ possibilities b coord@(x, y) =
     in
     filter assert possibilities
 
-possibilities' :: [Cell] -> Int -> [Int]
-possibilities' b p = possibilities (listToBoard b) (itop p)
-
 solve :: Board -> Board
 solve b = let
         board = boardToList b
@@ -102,7 +101,7 @@ solve b = let
         go b _ (-1) _ = listToBoard b
         go b _ 81 _ = listToBoard b
         go b b' i forward = let
-                poss = if forward then possibilities' b i else b' !! i
+                poss = if forward then possibilities b i else b' !! i
             in
             case poss of
                 [] -> let
