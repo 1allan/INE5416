@@ -4,6 +4,10 @@ import Data.Char (intToDigit)
 import Data.ByteString (unpack)
 import Sudoku
 
+{-
+Funcoes para tratar o retorno da solucao ao usuario por meio do terminal
+de execucao.
+-}
 instance Show Cell where
     show (Cell v r b) = [intToDigit v] ++ [r] ++ [b]
     show _ = show "N.."

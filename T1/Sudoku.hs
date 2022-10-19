@@ -1,11 +1,23 @@
 module Sudoku where
 import Data.Tuple (swap)
 
+{-
+Para representar cada celula da tabuleiro, foi criado uma estrutura com tres compos.
+Um representando o valor da celula, opercao da direita e operacai de baixo.
+-}
 data Cell = Nil | Cell {value :: Int, right :: Char, bottom :: Char}
 
+
+{-
+Tipos 'Line' para conter uma linha de celulas e 'Board' que contem todas as linhas do tabuleiro. 
+-}
 type Line = [Cell]
 type Board = [Line]
 
+
+{-
+Metodos auxiliares
+-}
 right' :: Cell -> Char
 right' Nil = '.'
 right' c = right c
@@ -32,6 +44,11 @@ bottomOp :: Cell -> (Int -> Bool)
 bottomOp Nil = const True
 bottomOp (Cell v _ b) = partialOp b v
 
+
+{-
+As funcoes boardToList e listToBoard sao usadas para podermos tratar o tabuleiro
+como matriz 9x9 ou como lista de 81 celulas, de acordo com o que for conveniente.
+-}
 boardToList :: Board -> [Cell]
 boardToList = concat
 
@@ -42,6 +59,11 @@ listToBoard b = take 9 b : listToBoard (drop 9 b)
 itop :: Int -> (Int, Int)
 itop i = swap (i `divMod` 9)
 
+
+{-
+Funcoes responsaveis por retornar uma celula ou uma linha de elementos do tabuleiro 
+ao passar uma coordenada.
+-}
 cellAt :: Board -> (Int, Int) -> Cell
 cellAt b (x, y)
     | x < 0 || y < 0 || x >= length b || y >= length b = Nil
@@ -66,20 +88,37 @@ regionAt b (x, y) =
         rows = take 3 (drop y' b) in
     concatMap (take 3 . drop x') rows
 
+
+{-
+Funcao responsavel por adicionar ou trocar o valor de uma celula.
+-}
 replace :: [a] -> a -> Int -> [a]
 replace l e i
     | i >= 0 && i < length l = take i l ++ [e] ++ drop (i + 1) l
     | otherwise = l
 
+
+{-
+Funcao responsavel por determinar a lista de possibilidades de cada celula
+enquanto o tabuleiro esta sendo percorrido.
+-}
 possibilities :: [Cell] -> Int -> [Int]
 possibilities b' index =
     let
         coord@(x, y) = itop index
+        
+        {-
+        Convertendo o tabuleiro para uma matriz e determinando a celula atual,
+        a celula acima dela e a celula a esquerda dela
+        -}
         b = listToBoard b'
         currentCell = cellAt b coord
         upperCell = cellAt b (x, y - 1)
         leftCell = cellAt b (x - 1, y)
 
+        {-
+        Validando as celulas adjacentes
+        -}
         assert v = all (\cond -> cond v) [rightOp leftCell, bottomOp upperCell]
 
         usedValues = map value (rowAt b y ++ columnAt b x ++ regionAt b coord)
@@ -92,6 +131,12 @@ possibilities b' index =
     in
     filter assert possibilities
 
+
+
+{-
+Funcao que percorre o tabuleiro e determina os numeros que devem preencher cada celula,
+usando a funcao possibilities para determinar os valores possiveis em cada iteracao
+-}
 solve :: Board -> Board
 solve b = let
         board = boardToList b
