@@ -152,3 +152,4 @@ solve b = let
                         newCell = Cell x (right currCell) (bottom currCell)
                     in
                     go (replace b newCell i) (replace b' xs i) (i + 1) True
+
