@@ -1,7 +1,6 @@
 module Print where
 
 import Data.Char (intToDigit)
-import Data.ByteString (unpack)
 import Sudoku
 
 {-
@@ -10,7 +9,6 @@ de execucao.
 -}
 instance Show Cell where
     show (Cell v r b) = [intToDigit v] ++ [r] ++ [b]
-    show _ = show "N.."
 
 divH = " "
 divV = " "
