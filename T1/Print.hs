@@ -3,10 +3,6 @@ module Print where
 import Data.Char (intToDigit)
 import Sudoku
 
-{-
-Funcoes para tratar o retorno da solucao ao usuario por meio do terminal
-de execucao.
--}
 instance Show Cell where
     show (Cell v r b) = [intToDigit v] ++ [r] ++ [b]
 
