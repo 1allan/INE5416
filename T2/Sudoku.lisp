@@ -1,13 +1,19 @@
-;(setq cell)
-
-(defun inverseOf (n)
-    (cond
-        ((= n "+") "-")
-        ((= n "-") "+")
-        ;((= n n) "Caso 3") ;inverseOf c = c
-    )
-
+(defstruct Cell
+    value
+    right
+    bottom
 )
+
+(setq Line (Cell))
+
+; (defun inverseOf (n)
+;     (cond
+;         ((= n "+") "-")
+;         ((= n "-") "+")
+;         ;((= n n) "Caso 3") ;inverseOf c = c
+;     )
+
+; )
 
 ; (defun partialOp (char val)
 ;     (cond
