@@ -71,8 +71,8 @@
 (defun region-at (board coord)
     (let (b x y rows)
         (setf b (copy-list board))
-        (setf x (* (/ (first coord) 3) 3))
-        (setf y (* (/ (second coord) 3) 3))
+        (setf x (* (floor (first coord) 3) 3))
+        (setf y (* (floor (second coord) 3) 3))
         (setf rows (subseq (subseq b y) 0 3))
         (map 'list (lambda (r) (subseq (subseq r x) 0 3)) rows)
     )
@@ -137,7 +137,7 @@
         (cond
             ((= i -1) (list-to-board b))
             ((= i 81) (list-to-board b))
-            (t (let (poss)
+            (t (progn
                 (setq poss (if (not (null forward)) (possibilities b i) (nth i b_)))
                 (if (= (length poss) 0)
                     (progn

@@ -33,7 +33,7 @@
             )
         )
     )
-    (print (solve (parse (cdr list_))))
+    (print (solve (parse (reverse (cdr list_)))))
 )
 
 (main)
