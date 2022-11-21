@@ -1,6 +1,15 @@
 (load "./sudoku.lisp")
 (load "./helpers.lisp")
 
+(defun split-string (str separator)
+    (loop for i = 0 then (1+ j)
+        as j = (position separator str :start i)
+        collect (subseq str i j)
+        while j
+    )
+)
+
+
 (defun parse (rows)
     (let (new-cell map-row)
         (setq new-cell (lambda (tuple)
@@ -26,9 +35,7 @@
             )
         )
     )
-    (print (cdr list_))
-    (print (first (first (parse (cdr list_)))))
-    (print (cdr list_))
+    (solve (cdr list_))
 )
 
 (main)

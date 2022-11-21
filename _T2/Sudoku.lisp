@@ -12,7 +12,7 @@
     (cond
         ((string= op "+") (lambda (x) (> val x)))
         ((string= op "-") (lambda (x) (< val x)))
-        (T (lambda (x) T))
+        (T (constantly T))
     )
 )
 
@@ -78,14 +78,23 @@
     )
 )
 
+(defun replace_ (l e i)
+    (if (and (>= i 0) (< i (length l)))
+        (concatenate 'list ((subseq l 0 i) (e) (subseq l (+ i 1))))
+    )
+)
+
 (defun possibilities (b_ index)
-    (let (coord x y )
+    (let (
+            coord x y b current-cell upper-cell left-cell assert_ used_values
+            operations min-value max-value possibilities
+        )
         (setf coord (itop index))
         (setf x (first coord))
-        (setf y (second coorsd))
+        (setf y (second coord))
 
-        (setf b (list-to-board b_)
-        (setf current-cell (cell-at b coord)))
+        (setf b (list-to-board b_))
+        (setf current-cell (cell-at b coord))
         (setf upper-cell
             (if (> y 0)
                 (cell-at b (x . (- y 1)))
@@ -116,8 +125,43 @@
         (setf possibilities
             (remove-if-not
                 (lambda (v) (= (count v used-values) 0))
-                (loop :from min-value :below max-value :for n :collect n)))
+                (loop :for n :from min-value :below max-value :collect n)))
 
         (remove-if-not (lambda (p) (funcall assert_ p)) possibilities)
+    )
+)
+
+(defun solve (b)
+    (defun rec (b b_ i forward)
+        (cond
+            ((= index -1) (list-to-board b))
+            ((= index 81) (list-to-board b))
+        )
+        (let (poss)
+            (setq poss (if (= forward T) (possibilities b i) (nth i b_)))
+            (if (= (length poss) 0)
+                (let (curr-cell empty-cell)
+                    (setq curr-cell (nth i b))
+                    (setq empty-cell (make-cell
+                        :value 0
+                        :right (cell-right curr-cell)
+                        :bottom (cell-bottom curr-cell)))
+                    (rec (replace_ b empty-cell i) b_ (- i 1) Nil)
+                )
+                (let (curr-cell new-cell)
+                    (setq curr-cell (nth i b))
+                    (setq new-cell (make-cell
+                        :value (first poss)
+                        :right (cell-right curr-cell)
+                        :bottom (cell-bottom curr-cell)))
+                    (rec (replace_ b new-cell i) (replace_ b_ (rest poss) i) (+ i 1) T)
+                )
+            )
+        )
+    )
+    (let (board poss-matrix rec)
+        (setq board (board-to-list b))
+        (setq poss-matrix (map (constantly nil) board))
+        (rec board poss-matrix 0 T)
     )
 )
