@@ -80,7 +80,8 @@
 
 (defun replace_ (l e i)
     (if (and (>= i 0) (< i (length l)))
-        (concatenate 'list ((subseq l 0 i) (e) (subseq l (+ i 1))))
+        (concatenate 'list (subseq l 0 i) (list e) (subseq l (+ i 1)))
+        l
     )
 )
 
@@ -97,11 +98,11 @@
         (setf current-cell (cell-at b coord))
         (setf upper-cell
             (if (> y 0)
-                (cell-at b (x . (- y 1)))
+                (cell-at b (list x (- y 1)))
                 (make-cell :value 0 :right "." :bottom ".")))
         (setf left-cell
             (if (> x 0)
-                (cell-at b ((- x 1) . y))
+                (cell-at b (list (- x 1) y))
                 (make-cell :value 0 :right "." :bottom ".")))
 
         (setf assert_ (lambda (value)
