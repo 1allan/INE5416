@@ -45,7 +45,7 @@
 )
 
 (defun itop (i)
-    (cons (mod i 9) (floor i 9)))
+    (list (mod i 9) (floor i 9)))
 
 (defun cell-at (board coord)
     (nth (first coord) (nth (second coord) board))
@@ -108,12 +108,12 @@
         (setf assert_ (lambda (value)
             (every
                 (lambda (cond_) (funcall cond_ value))
-                '((right-op left-cell) (bottom-op upper-cell)))))
+                (concatenate 'list (list (right-op left-cell)) (list (bottom-op upper-cell))))))
 
         (setf used-values (
             map 'list
-            cell-value
-            '((row-at b y) (column-at b x) (region-at b coord))))
+            (lambda (c) (cell-value c))
+            (concatenate 'list (row-at b y) (column-at b x) (board-to-list (region-at b coord))))) ; using `board-to-list` to flatten the 3x3 matrix
 
         (setf operations '(
             (inverse-of (cell-right left-cell))
@@ -133,36 +133,32 @@
 )
 
 (defun solve (b)
-    (defun rec (b b_ i forward)
+    (defun rec- (b b_ i forward)
         (cond
-            ((= index -1) (list-to-board b))
-            ((= index 81) (list-to-board b))
-        )
-        (let (poss)
-            (setq poss (if (= forward T) (possibilities b i) (nth i b_)))
-            (if (= (length poss) 0)
-                (let (curr-cell empty-cell)
-                    (setq curr-cell (nth i b))
-                    (setq empty-cell (make-cell
-                        :value 0
-                        :right (cell-right curr-cell)
-                        :bottom (cell-bottom curr-cell)))
-                    (rec (replace_ b empty-cell i) b_ (- i 1) Nil)
+            ((= i -1) (list-to-board b))
+            ((= i 81) (list-to-board b))
+            (t (let (poss)
+                (setq poss (if (not (null forward)) (possibilities b i) (nth i b_)))
+                (if (= (length poss) 0)
+                    (progn
+                        (setq curr-cell (nth i b))
+                        (setq empty-cell (make-cell
+                            :value 0
+                            :right (cell-right curr-cell)
+                            :bottom (cell-bottom curr-cell)))
+                        (rec- (replace_ b empty-cell i) b_ (- i 1) nil)
+                    )
+                    (progn
+                        (setq curr-cell (nth i b))
+                        (setq new-cell (make-cell
+                            :value (first poss)
+                            :right (cell-right curr-cell)
+                            :bottom (cell-bottom curr-cell)))
+                        (rec- (replace_ b new-cell i) (replace_ b_ (rest poss) i) (+ i 1) t)
+                    )
                 )
-                (let (curr-cell new-cell)
-                    (setq curr-cell (nth i b))
-                    (setq new-cell (make-cell
-                        :value (first poss)
-                        :right (cell-right curr-cell)
-                        :bottom (cell-bottom curr-cell)))
-                    (rec (replace_ b new-cell i) (replace_ b_ (rest poss) i) (+ i 1) T)
-                )
-            )
+            ))
         )
     )
-    (let (board poss-matrix rec)
-        (setq board (board-to-list b))
-        (setq poss-matrix (map (constantly nil) board))
-        (rec board poss-matrix 0 T)
-    )
+    (rec- (board-to-list b) (map 'list (constantly nil) (board-to-list b)) 0 t)
 )

@@ -1,5 +1,4 @@
 (load "./sudoku.lisp")
-(load "./helpers.lisp")
 
 (defun split-string (str separator)
     (loop for i = 0 then (1+ j)
@@ -8,7 +7,6 @@
         while j
     )
 )
-
 
 (defun parse (rows)
     (let (new-cell map-row)
@@ -35,7 +33,7 @@
             )
         )
     )
-    (solve (cdr list_))
+    (print (solve (parse (cdr list_))))
 )
 
 (main)
