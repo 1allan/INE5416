@@ -14,7 +14,7 @@ inverseOf c = c
 partialOp :: Char -> Int -> (Int -> Bool)
 partialOp '+' val = (>) val
 partialOp '-' val = (<) val
-partialOp _ _  = const True
+partialOp _ _ = const True
 
 rightOp :: Cell -> (Int -> Bool)
 rightOp (Cell v r _) = partialOp r v
@@ -54,13 +54,10 @@ regionAt b (x, y) = let
     in
     concatMap (take 3 . drop x') rows
 
-
-
 replace :: [a] -> a -> Int -> [a]
 replace l e i
     | i >= 0 && i < length l = take i l ++ [e] ++ drop (i + 1) l
     | otherwise = l
-
 
 possibilities :: [Cell] -> Int -> [Int]
 possibilities b' index =
@@ -87,7 +84,7 @@ possibilities b' index =
 solve :: Board -> Board
 solve b = let
         board = boardToList b
-        possMatrix =  map (const []) board
+        possMatrix = map (const []) board
     in
     go board possMatrix 0 True where
         go b _ (-1) _ = listToBoard b
