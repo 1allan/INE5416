@@ -6,8 +6,7 @@
         (concatenate 'string
             (list (digit-char (cell-value c))
             (cell-right c)
-            (cell-bottom c)))) line))
-)
+            (cell-bottom c)))) line)))
 
 (defun print-board (board)
     (terpri)
