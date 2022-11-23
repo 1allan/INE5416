@@ -4,9 +4,7 @@
     (loop for i = 0 then (1+ j)
         as j = (position separator str :start i)
         collect (subseq str i j)
-        while j
-    )
-)
+        while j))
 
 (defun parse (rows)
     (let (new-cell map-row)
@@ -15,11 +13,8 @@
                 :value 0
                 :right (char tuple 0)
                 :bottom (char tuple 1))))
-        (setq map-row (lambda (row) 
-            (map 'list new-cell (split-string row #\Space))))
-        (map 'list map-row rows)
-    )
-)
+        (setq map-row (lambda (row) (map 'list new-cell (split-string row #\Space))))
+        (map 'list map-row rows)))
 
 (defun main ()
     (write-string "Board id: ")
@@ -29,11 +24,7 @@
     (with-open-file (in file-name :if-does-not-exist nil)
         (when in
             (loop for line = (read-line in nil)
-                while line do (push line list_)
-            )
-        )
-    )
-    (print (solve (parse (reverse list_))))
-)
+                while line do (push line list_))))
+    (print (solve (parse (reverse list_)))))
 
 (main)

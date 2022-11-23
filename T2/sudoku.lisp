@@ -4,69 +4,51 @@
     (cond
         ((char= op #\+) #\-)
         ((char= op #\-) #\+)
-        (T op)
-    )
-)
+        (T op)))
 
 (defun partial-op (op val)
     (cond
         ((char= op #\+) (lambda (x) (> val x)))
         ((char= op #\-) (lambda (x) (< val x)))
-        (T (constantly T))
-    )
-)
+        (T (constantly T))))
 
 (defun right-op (c)
-    (partial-op (cell-right c) (cell-value c))
-)
+    (partial-op (cell-right c) (cell-value c)))
 
 (defun bottom-op (c)
-    (partial-op (cell-bottom c) (cell-value c))
-)
+    (partial-op (cell-bottom c) (cell-value c)))
 
 (defun board-to-list (b)
     (defun rec (acc b)
         (if (= (length b) 0)
             acc
-            (rec (nconc acc (copy-list (car b))) (cdr b))
-        )
-    )
-    (rec nil b)
-)
+            (rec (nconc acc (copy-list (car b))) (cdr b))))
+    (rec nil b))
 
 (defun list-to-board (l)
     (defun rec- (acc l)
         (if (= (length l) 0)
             acc
-            (rec- (push (subseq l 0 9) acc) (subseq l 9))
-        )
-    )
-    (reverse (rec- nil l))
-)
+            (rec- (push (subseq l 0 9) acc) (subseq l 9))))
+    (reverse (rec- nil l)))
 
 (defun itop (i)
     (list (mod i 9) (floor i 9)))
 
 (defun cell-at (board coord)
-    (nth (first coord) (nth (second coord) board))
-)
+    (nth (first coord) (nth (second coord) board)))
 
 (defun row-at (board i)
     (if (or (< i 0) (>= i (length board)))
         nil
-        (nth i board)
-    )
-)
+        (nth i board)))
 
 (defun column-at (board i)
     (defun rec-- (acc b)
         (if (<= (length b) 0)
             acc
-            (rec-- (push (nth i (car b)) acc) (cdr b))
-        )
-    )
-    (reverse (rec-- nil (copy-list board)))
-)
+            (rec-- (push (nth i (car b)) acc) (cdr b))))
+    (reverse (rec-- nil (copy-list board))))
 
 (defun region-at (board coord)
     (let (b x y rows)
@@ -74,22 +56,16 @@
         (setf x (* (floor (first coord) 3) 3))
         (setf y (* (floor (second coord) 3) 3))
         (setf rows (subseq (subseq b y) 0 3))
-        (map 'list (lambda (r) (subseq (subseq r x) 0 3)) rows)
-    )
-)
+        (map 'list (lambda (r) (subseq (subseq r x) 0 3)) rows)))
 
 (defun replace_ (l e i)
     (if (and (>= i 0) (< i (length l)))
         (concatenate 'list (subseq l 0 i) (list e) (subseq l (+ i 1)))
-        l
-    )
-)
+        l))
 
 (defun possibilities (b_ index)
-    (let (
-            coord x y b current-cell upper-cell left-cell assert_ used-values
-            operations min-value max-value possibilities
-        )
+    (let (coord x y b current-cell upper-cell left-cell assert_ used-values
+          operations min-value max-value possibilities)
         (setf coord (itop index))
         (setf x (first coord))
         (setf y (second coord))
@@ -108,8 +84,7 @@
         (setf assert_ (lambda (value)
             (every
                 (lambda (cond_) (funcall cond_ value))
-                (list (right-op left-cell) (bottom-op upper-cell))
-            )))
+                (list (right-op left-cell) (bottom-op upper-cell)))))
 
         (setf used-values (
             map 'list
@@ -129,9 +104,7 @@
                 (lambda (v) (= (count v used-values) 0))
                 (loop :for n :from min-value :below (+ max-value 1) :collect n)))
 
-        (remove-if-not (lambda (p) (funcall assert_ p)) possibilities)
-    )
-)
+        (remove-if-not (lambda (p) (funcall assert_ p)) possibilities)))
 
 (defun solve (board)
     (let (b b_ i forward)
@@ -161,11 +134,5 @@
                         (setf b (replace_ b new-cell i))
                         (setf b_ (replace_ b_ (rest poss) i))
                         (setf i (+ i 1))
-                        (setf forward t)
-                    )
-                )
-            )
-        )
-        (list-to-board b)
-    )
-)
+                        (setf forward t)))))
+        (list-to-board b)))
