@@ -1,21 +1,17 @@
 (defstruct cell value right bottom)
 
-(defun print-board (board)
-    (map 'list (lambda (l) (print (map 'list (lambda (c) (cell-value c)) l))) board)
-)
-
 (defun inverse-of (op)
     (cond
-        ((string= op #\+) #\-)
-        ((string= op #\-) #\+)
+        ((char= op #\+) #\-)
+        ((char= op #\-) #\+)
         (T op)
     )
 )
 
 (defun partial-op (op val)
     (cond
-        ((string= op #\+) (lambda (x) (> val x)))
-        ((string= op #\-) (lambda (x) (< val x)))
+        ((char= op #\+) (lambda (x) (> val x)))
+        ((char= op #\-) (lambda (x) (< val x)))
         (T (constantly T))
     )
 )
@@ -112,12 +108,13 @@
         (setf assert_ (lambda (value)
             (every
                 (lambda (cond_) (funcall cond_ value))
-                (concatenate 'list (list (right-op left-cell)) (list (bottom-op upper-cell))))))
+                (list (right-op left-cell) (bottom-op upper-cell))
+            )))
 
         (setf used-values (
             map 'list
             (lambda (c) (cell-value c))
-            (concatenate 'list (row-at b y) (column-at b x) (board-to-list (region-at b coord))))) ; using `board-to-list` to flatten the 3x3 matrix
+            (concatenate 'list (row-at b y) (column-at b x) (board-to-list (region-at b coord)))))
 
         (setf operations (list
             (inverse-of (cell-right left-cell))
@@ -130,7 +127,7 @@
         (setf possibilities
             (remove-if-not
                 (lambda (v) (= (count v used-values) 0))
-                (loop :for n :from min-value :below max-value :collect n)))
+                (loop :for n :from min-value :below (+ max-value 1) :collect n)))
 
         (remove-if-not (lambda (p) (funcall assert_ p)) possibilities)
     )
@@ -169,6 +166,6 @@
                 )
             )
         )
-        b
+        (list-to-board b)
     )
 )
