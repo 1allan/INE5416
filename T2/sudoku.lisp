@@ -60,7 +60,7 @@
 
 (defun replace_ (l e i)
     (if (and (>= i 0) (< i (length l)))
-        (concatenate 'list (subseq l 0 i) (list e) (subseq l (+ i 1)))
+        (append (subseq l 0 i) (list e) (subseq l (+ i 1)))
         l))
 
 (defun possibilities (b_ index)
@@ -89,7 +89,7 @@
         (setf used-values (
             map 'list
             (lambda (c) (cell-value c))
-            (concatenate 'list (row-at b y) (column-at b x) (board-to-list (region-at b coord)))))
+            (append (row-at b y) (column-at b x) (board-to-list (region-at b coord)))))
 
         (setf operations (list
             (inverse-of (cell-right left-cell))
