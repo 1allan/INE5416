@@ -26,6 +26,7 @@
         (when in
             (loop for line = (read-line in nil)
                 while line do (push line list_))))
+    (terpri)
     (print-board (solve (parse (reverse list_)))))
 
 (main)
