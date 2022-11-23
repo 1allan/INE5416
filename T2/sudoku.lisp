@@ -4,13 +4,13 @@
     (cond
         ((char= op #\+) #\-)
         ((char= op #\-) #\+)
-        (T op)))
+        (t op)))
 
 (defun partial-op (op val)
     (cond
         ((char= op #\+) (lambda (x) (> val x)))
         ((char= op #\-) (lambda (x) (< val x)))
-        (T (constantly T))))
+        (t (constantly t))))
 
 (defun right-op (c)
     (partial-op (cell-right c) (cell-value c)))
@@ -26,11 +26,11 @@
     (rec nil b))
 
 (defun list-to-board (l)
-    (defun rec- (acc l)
+    (defun recc (acc l)
         (if (= (length l) 0)
             acc
-            (rec- (push (subseq l 0 9) acc) (subseq l 9))))
-    (reverse (rec- nil l)))
+            (recc (push (subseq l 0 9) acc) (subseq l 9))))
+    (reverse (recc nil l)))
 
 (defun itop (i)
     (list (mod i 9) (floor i 9)))
@@ -44,11 +44,11 @@
         (nth i board)))
 
 (defun column-at (board i)
-    (defun rec-- (acc b)
+    (defun reccc (acc b)
         (if (<= (length b) 0)
             acc
-            (rec-- (push (nth i (car b)) acc) (cdr b))))
-    (reverse (rec-- nil (copy-list board))))
+            (reccc (push (nth i (car b)) acc) (cdr b))))
+    (reverse (reccc nil (copy-list board))))
 
 (defun region-at (board coord)
     (let (b x y rows)
@@ -107,14 +107,14 @@
         (remove-if-not (lambda (p) (funcall assert_ p)) possibilities)))
 
 (defun solve (board)
-    (let (b b_ i forward)
+    (let (b p i forward)
         (setf b (board-to-list board))
-        (setf b_ (map 'list (constantly nil) (board-to-list board)))
+        (setf p (map 'list (constantly nil) (board-to-list board)))
         (setf i 0)
         (setf forward t)
         (loop while (and (> i -1) (< i 81)) do
             (let (poss curr-cell)
-                (setf poss (if (not (null forward)) (possibilities b i) (nth i b_)))
+                (setf poss (if (not (null forward)) (possibilities b i) (nth i p)))
                 (setf curr-cell (nth i b))
                 (if (= (length poss) 0)
                     (let (empty-cell)
@@ -132,7 +132,7 @@
                             :right (cell-right curr-cell)
                             :bottom (cell-bottom curr-cell)))
                         (setf b (replace_ b new-cell i))
-                        (setf b_ (replace_ b_ (rest poss) i))
+                        (setf p (replace_ p (rest poss) i))
                         (setf i (+ i 1))
                         (setf forward t)))))
         (list-to-board b)))

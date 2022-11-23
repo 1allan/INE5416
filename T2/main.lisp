@@ -1,4 +1,5 @@
 (load "./sudoku.lisp")
+(load "./print.lisp")
 
 (defun split-string (str separator)
     (loop for i = 0 then (1+ j)
@@ -25,6 +26,6 @@
         (when in
             (loop for line = (read-line in nil)
                 while line do (push line list_))))
-    (print (solve (parse (reverse list_)))))
+    (print-board (solve (parse (reverse list_)))))
 
 (main)
