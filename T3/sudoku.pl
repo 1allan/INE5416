@@ -85,6 +85,8 @@ slice(Board, From, To, Return):-
     length([_|LTo], To),
     append(LTo, _, L),
     append(LFrom, Return, LTo).
+
+
 # executa e retorna:
 # ?- slice([a,b,c,d,e], 1, 4, Return).
 # Return = [b, c].
@@ -103,7 +105,12 @@ listToBoard(Lista)
 #(defun itop (i)
 # (list (mod i 9) (floor i 9)))
 
+# LISP
+# (defun itop (i)
+#     (list (mod i 9) (floor i 9)))
+
 itop()
+
 
 
 
@@ -112,6 +119,7 @@ itop()
 # cellAt :: Board -> (Int, Int) -> Cell
 # cellAt b (x, y) = (b !! y) !! x
 
+cellAt(Board, (a, b))
 
 
 
