@@ -1,5 +1,5 @@
 :- include('sudoku.pl').
-
+:- compile('sudoku.pl').
 
 main :-
     write('Board id: '),
@@ -9,8 +9,15 @@ main :-
     open(FullBoardName, read, Str),
     read_file(Str,Lines),
 
+    write('Solving... '),
+
     close(Str),
-    write(Lines), nl.
+    #write(Lines), nl.
+
+    #solve(Lines) 
+    # ...
+
+
 
 read_file(Stream,[]) :-
     at_end_of_stream(Stream).
