@@ -1,7 +1,7 @@
 :- include('sudoku.pl').
 :- compile('sudoku.pl').
 
-# Inicializacao do programa
+% Inicializacao do programa
 main :-
     write('Board id: '),
     read(BoardName)
@@ -13,13 +13,12 @@ main :-
     write('Solving... '),
 
     close(Str),
-    #write(Lines), nl.
 
     solve(Lines) 
 
 
 
-# Carregar o tabuleiro, em formato de .txt, passado e retorna a estrutura de dados de um tabuleiro.
+% Carregar o tabuleiro, em formato de .txt, passado e retorna a estrutura de dados de um tabuleiro.
 read_file(Stream,[]) :-
     at_end_of_stream(Stream).
 
