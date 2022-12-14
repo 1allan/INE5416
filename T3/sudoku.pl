@@ -1,4 +1,4 @@
-board)[
+board = [
     ['++', '++', '.-', '+-', '++', '.-', '++', '+-', '.-'],
     ['--', '-+', '.-', '++', '-+', '.+', '++', '+-', '.-'],
     ['+.', '-.', '..', '+.', '-.', '..', '-.', '-.', '..'],
@@ -10,19 +10,40 @@ board)[
     ['-.', '+.', '..', '+.', '+.', '..', '-.', '-.', '..']
 ].
 
-
 operation(op_greater).
 operation(op_less).
 operation(op_noop).
+
+% Conta os elementos em uma lista
+count(_, [], 0).
+count(X, [X | T], N) :-
+    !, count(X, T, N1),
+    N is N1 + 1.
+count(X, [_ | T], N) :-
+    count(X, T, N).
+
+% Verifica se o elemento está presente na lista
+not_a_member(_, []).
+not_a_member(El, [El|_]) :- !.
+not_a_member(El, [_|T]) :- !, not_a_member(El, T).
 
 % Predicados de acesso de dados das células
 value(V, [V|_]).
 right_op(Op, [_|Op]).
 bottom_op(Op, Cell) :- nth0(2, Cell, Op).
 
+% Cria uma nova célula
+create_new_cell(Value, RightOp, BottomOp, Cell) :-
+    Cell = [Value, RightOp, BottomOp].
+
+
+% Cria uma nova célula vazia
+create_empty_cell(Cell) :-
+    Cell = [0, opNoop, opNoop].
+
 % Inverte a operação: "maior que" vira "menor que", vice-versa. op_noop caso
 % contrário (não há operação)
-inverse_of(Op, Out) :- 
+inverse_of(Op, Out) :-
     (Op = op_noop -> Out = op_noop;
         (Op = op_less -> Out = op_greater; Out = op_less)).
 
@@ -75,5 +96,67 @@ region_at(Board, [X|Y], Region) :-
     take(3, B, Rows),
     board_to_list(Region, 3, Rows).
 
-possibilities(Board, I, List) :- !.
-solve(Board, Solved) :- !.
+% Retorna uma célula do tabuleiro
+cell_at(Board, [X|Y], Cell) :-
+    nth0(Y, Board, Row),
+    nth0(X, Row, Cell).
+
+replace(List, Element, I, NewList) :-
+    take(I, List, FirstPart),
+    drop(I + 1, List, SecondPart),
+    append([FirstPart, [Element], SecondPart], NewList).
+
+possibilities(Board, I, List) :-
+    itop(I, Coord),
+    list_to_board(Board, 9, B),
+    cell_at(B, Coord, CurrentCell),
+    (Y > 0 -> cell_at(B, [X, Y - 1], UpperCell); create_empty_cell(UpperCell)),
+    (X > 0 -> cell_at(B, [X - 1, Y], LeftCell); create_empty_cell(LeftCell)),
+    row_at(Board, I, Row),
+    column_at(Board, I, Column),
+    region_at(Board, I, Region),
+    Shared = [Row, Column, Region],
+    maplist(value, Shared, UsedValues),
+
+    right_op(LeftCell, RightOp),
+    inverse_of(RightOp, InvRightOpLeftCell),
+    bottomt_op(UpperCell, BottomtOp),
+    inverse_of(BottomtOp, InvBottomtOpUpperCell),
+    right_op(CurrentCell, RightOpCurr),
+    bottom_op(CurrentCell, BottomOpCurr),
+    Operations = [InvRightOpLeftCell, InvBottomtOpUpperCell, RightOpCurr, BottomOpCurr],
+    count('+', Operations, GreaterQuantity),
+    count('-', Operations, LessQuantity),
+    MinValue is 1 + GreaterQuantity,
+    MaxValue is 9 - LessQuantity,
+
+    not_a_member(X, Possibilities), X >= MinValue, X <= MaxValue,
+    maplist(Possibilities, List).
+
+solve(Board, Solved) :-
+    board_to_list(Board, 9, B),
+    possibilities(B, PossMatrix)
+    go(B, PossMatrix, 0, yes, Solved).
+
+go(Board, PossMatrix, I, Forward, Result) :- !.
+    (I = -1; I = 81 -> list_to_board(Board, Solved), Result = Solved
+    ;
+        (Forward = yes -> possibilities(Board, I, Poss);  nth0(I, PossMatrix, Poss))
+    ),
+    length(Poss, PossQuantity),
+    (PossQuantity > 0 -> 
+        nth0(I, Board, CurrCell),
+        create_empty_cell(EmptyCell),
+        replace(Board, EmptyCell, I, ReplacedBoard),
+        go(ReplacedBoard, PossMatrix, I - 1, no)
+    ;
+        take(1, Poss, X),
+        drop(1, Poss, XS),
+        nth0(I, Board, CurrCell),
+        right(CurrCell, RightOp),
+        bottom(CurrCell, BottomOp),
+        create_new_cell(X, RightOp, BottomOp, NewCell),
+        replace(Board, NewCell, I, ReplacedBoard),
+        replace(PossMatrix, XS, I, ReplacedPossMatrix),
+        go(ReplacedBoard, ReplacedPossMatrix, I + 1, yes)
+    ).
