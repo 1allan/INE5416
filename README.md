@@ -3,7 +3,7 @@
 ## Solucionadores do puzzle Vergleichssudoku
 
 |    | Linguagem   |  Estado  |
-|----|:-----------:|---------:|
+|----|:-----------:| :-------:|
 | T1 | Haskell     | Funciona |
 | T2 | Common Lisp | Funciona |
 | T3 | Prolog      | Nem roda |
