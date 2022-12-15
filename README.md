@@ -1,4 +1,4 @@
-# INE5416 - Paradigmas de Programação
+# UFSC INE5416 - Paradigmas de Programação
 
 ## Solucionadores do puzzle Vergleichssudoku
 
